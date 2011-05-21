@@ -1,14 +1,16 @@
 README for tinyPack
-
+ 
+================================================================================
 Description
-=========================
-Compression algorithms for TinyOS. These algorithms can compress arrays of up to 256 bytes.
-They use no global memory other than the input and output arrays, making them suitable for
-typical TinyOS applications.
+
+Data compression algorithms for TinyOS. These algorithms can compress arrays of
+up to 256 bytes. They use no global memory other than the input and output
+arrays, making them suitable for typical TinyOS applications.
 
 Works in TinyOS 2.x.
 
+================================================================================
 License
-=========================
+
 For licensing details, see individual file headers.
 Licensed under the Apache License, Version 2.0.
