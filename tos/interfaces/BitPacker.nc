@@ -1,6 +1,6 @@
 /**
- * Name: Compressor.nc
- * Purpose: API for accessing compression algorithms.
+ * Name: BitPacker.nc
+ * Purpose: Interface for a bit vector utility.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -18,13 +18,15 @@
  * limitations under the License.
  */
 
-interface Compressor {
-	/* in - location of uncompressed text
-	   out - where compressed text will be written
-	   inLength - length of uncompressed text
-	   outMaxLength - maximum allowable compressed text length
-	   return - length of compressed text, or 0 if compression failed */
-	command uint8_t encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength);
+interface BitPacker {
+	/* Initialize the BitPacker.
+	   bitVector - where the bit vector will be stored
+	   maxLength - maximum bitVector length in bytes */
+	command void BitPacker.init(uint8_t* bitVector, uint8_t maxLength);
 
-	command uint8_t decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength);
+	/* Appends inVector to the current bit vector.
+	   inVector - right aligned bit vector to append
+	   inVectorLength - length in bits of inVector, maximum 8
+	   returns - FAIL if the bitVector overflows */
+	command error_t BitPacker.pack(uint8_t inVector, uint8_t inVectorLength);
 }
