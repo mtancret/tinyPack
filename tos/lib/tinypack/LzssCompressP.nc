@@ -1,5 +1,5 @@
 /**
- * Name: LzssCompressC.nc
+ * Name: LzssCompressP.nc
  * Purpose: Implementation of LZSS-like compression algorithms.
  * Author(s): Matthew Tan Creti
  *
@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-module LzssCompressC {
+module LzssCompressP {
 	provides {
 		interface Compressor;
 	}
@@ -35,8 +35,7 @@ implementation {
 		uint8_t maxOffset;
 		uint8_t maxLength;
 
-		bitfield = out;
-		bitfieldMaxLength = outMaxLength;
+		call BitPacker.init(out, outMaxLength);
 		byteIdx = 0;
 		nextBitIdx = 0;
 
@@ -102,7 +101,7 @@ implementation {
 			}
 		}
 
-		return BitPacker.getLength();
+		return call BitPacker.getLength();
 	}
 
 	command uint8_t Compressor.decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {

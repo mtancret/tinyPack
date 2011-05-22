@@ -1,5 +1,5 @@
 /**
- * Name: LzssCompressC.nc
+ * Name: LzssChainCompressP.nc
  * Purpose: Implementation of LZSS-like compression algorithms. Chain
  * compression can increase compression efficiency by using the previously
  * compressed text as a dictionary for compressing the current text.
@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-module LzssChainCompressC {
+module LzssChainCompressP {
 	provides {
 		interface ChainCompressor;
 	}
@@ -48,8 +48,7 @@ implementation {
 			lengthBits = 0;
 		}
 
-		bitfield = out;
-		bitfieldMaxLength = outMaxLength;
+		call BitPacker.init(out, outMaxLength);
 		byteIdx = 0;
 		nextBitIdx = 0;
 
@@ -110,7 +109,7 @@ implementation {
 			}
 		}
 
-		return BitPacker.getLength();
+		return call BitPacker.getLength();
 	}
 
 	command uint8_t Compressor.chainDecode(uint8_t* prev, uint8_t* in, uint8_t* out, uint8_t prevLength, uint8_t inLength, uint8_t outMaxLength) {
