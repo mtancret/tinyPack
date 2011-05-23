@@ -1,5 +1,5 @@
 /**
- * Name: ChainCompressor.nc
+ * ChainCompressor.nc
  * Purpose: API for accessing compression algorithms. Chain compression can
  * increase compression efficiency by using the previously compressed text
  * as a dictionary for compressing the current text.

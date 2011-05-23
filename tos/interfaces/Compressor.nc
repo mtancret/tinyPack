@@ -1,5 +1,5 @@
 /**
- * Name: Compressor.nc
+ * Compressor.nc
  * Purpose: API for accessing compression algorithms.
  * Author(s): Matthew Tan Creti
  *

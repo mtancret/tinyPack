@@ -1,5 +1,5 @@
 /**
- * Name: BitPackP.nc
+ * BitPackP.nc
  * Purpose: Implementation of a bit vector utility.
  * Author(s): Matthew Tan Creti
  *

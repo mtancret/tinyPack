@@ -1,6 +1,6 @@
 /**
- * BitPacker.nc
- * Purpose: Interface for a bit vector utility.
+ * LzssCompressC.nc
+ * Purpose: Provides LZSS-like compression algorithms.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -18,17 +18,15 @@
  * limitations under the License.
  */
 
-interface BitPacker {
-	/* Initialize the BitPacker.
-	   bitVector - where the bit vector will be stored
-	   maxLength - maximum bitVector length in bytes */
-	command void init(uint8_t* bitVector, uint8_t maxLength);
+configuration LzssCompressC {
+	provides {
+		interface Compressor;
+	}
+}
+implementation {
+	components LzssCompressP;
+	components BitPackP;
 
-	/* Appends inVector to the current bit vector.
-	   inVector - right aligned bit vector to append
-	   inVectorLength - length in bits of inVector, maximum 8
-	   returns - FAIL if the bitVector overflows */
-	command error_t pack(uint8_t inVector, uint8_t inVectorLength);
-
-	command uint8_t getLength();
+	Compressor = LzssCompressP.Compressor;
+	LzssCompressP.BitPacker -> BitPackP.BitPacker;
 }

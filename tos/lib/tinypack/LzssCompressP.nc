@@ -1,5 +1,5 @@
 /**
- * Name: LzssCompressP.nc
+ * LzssCompressP.nc
  * Purpose: Implementation of LZSS-like compression algorithms.
  * Author(s): Matthew Tan Creti
  *
@@ -36,8 +36,6 @@ implementation {
 		uint8_t maxLength;
 
 		call BitPacker.init(out, outMaxLength);
-		byteIdx = 0;
-		nextBitIdx = 0;
 
 		/* encode all of in[] */
 		encStartIdx = 0;
@@ -66,8 +64,8 @@ implementation {
 			}
 
 			if (maxLength < 1) {
-				if (pack(0, 1) == FAIL) return 0;
-				if (pack(in[encStartIdx], 8) == FAIL) return 0;
+				if (call BitPacker.pack(0, 1) == FAIL) return 0;
+				if (call BitPacker.pack(in[encStartIdx], 8) == FAIL) return 0;
 
 				encStartIdx++;
 			} else {
@@ -93,9 +91,9 @@ implementation {
 					}
 				}
 
-				if (pack(1, 1) == FAIL) return 0;
-				if (pack(maxOffset, offsetBits) == FAIL) return 0;
-				if (pack(maxLength, lengthBits) == FAIL) return 0;
+				if (call BitPacker.pack(1, 1) == FAIL) return 0;
+				if (call BitPacker.pack(maxOffset, offsetBits) == FAIL) return 0;
+				if (call BitPacker.pack(maxLength, lengthBits) == FAIL) return 0;
 
 				encStartIdx += maxLength + 1;
 			}

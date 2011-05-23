@@ -1,6 +1,8 @@
 /**
- * BitPacker.nc
- * Purpose: Interface for a bit vector utility.
+ * LzssChainCompressC.nc
+ * Purpose: Provides LZSS-like compression algorithms. Chain compression
+ * can increase compression efficiency by using the previously compressed
+ * text as a dictionary for compressing the current text.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -18,17 +20,15 @@
  * limitations under the License.
  */
 
-interface BitPacker {
-	/* Initialize the BitPacker.
-	   bitVector - where the bit vector will be stored
-	   maxLength - maximum bitVector length in bytes */
-	command void init(uint8_t* bitVector, uint8_t maxLength);
+configuration LzssChainCompressC {
+	provides {
+		interface ChainCompressor;
+	}
+}
+implementation {
+	components LzssChainCompressP;
+	components BitPackP;
 
-	/* Appends inVector to the current bit vector.
-	   inVector - right aligned bit vector to append
-	   inVectorLength - length in bits of inVector, maximum 8
-	   returns - FAIL if the bitVector overflows */
-	command error_t pack(uint8_t inVector, uint8_t inVectorLength);
-
-	command uint8_t getLength();
+	ChainCompressor = LzssChainCompressP.ChainCompressor;
+	LzssChainCompressP.BitPacker -> BitPackP.BitPacker;
 }

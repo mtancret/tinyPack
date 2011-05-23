@@ -1,5 +1,5 @@
 /**
- * Name: LzssChainCompressP.nc
+ * LzssChainCompressP.nc
  * Purpose: Implementation of LZSS-like compression algorithms. Chain
  * compression can increase compression efficiency by using the previously
  * compressed text as a dictionary for compressing the current text.
@@ -20,6 +20,8 @@
  * limitations under the License.
  */
 
+#include "bittwiddel.h"
+
 module LzssChainCompressP {
 	provides {
 		interface ChainCompressor;
@@ -29,7 +31,7 @@ module LzssChainCompressP {
 	}
 }
 implementation {
-	command uint8_t Compressor.chainEncode(uint8_t* prev, uint8_t* in, uint8_t* out, uint8_t prevLength, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.chainEncode(uint8_t* prev, uint8_t* in, uint8_t* out, uint8_t prevLength, uint8_t inLength, uint8_t outMaxLength) {
 		uint16_t encStartIdx;
 		uint16_t encMatchIdx;
 		uint16_t dicStartIdx;
@@ -40,7 +42,7 @@ implementation {
 		uint8_t lengthBits;
 
 		if (prevLength > 1) {
-			int bits = 8 - __builtin_clz(prevLength - 1);
+			uint8_t bits = 8 - clz8(prevLength - 1);
 			offsetBits = bits;
 			lengthBits = bits;
 		} else {
@@ -49,8 +51,6 @@ implementation {
 		}
 
 		call BitPacker.init(out, outMaxLength);
-		byteIdx = 0;
-		nextBitIdx = 0;
 
 		/* encode all of in[] */
 		encStartIdx = prevLength;
@@ -85,8 +85,8 @@ implementation {
 			}
 
 			if (maxLength < 1) {
-				if (pack(0, 1) == FAIL) return 0;
-				if (pack(in[encStartIdx-prevLength], 8) == FAIL) return 0;
+				if (call BitPacker.pack(0, 1) == FAIL) return 0;
+				if (call BitPacker.pack(in[encStartIdx-prevLength], 8) == FAIL) return 0;
 
 				encStartIdx++;
 			} else {
@@ -94,16 +94,16 @@ implementation {
 
 				if (remaining < inLength/2) {
 					if (remaining > 1) {
-						int bits = 8 - __builtin_clz(remaining - 1);
+						uint8_t bits = 8 - clz8(remaining - 1);
 						lengthBits = bits;
 					} else {
 						lengthBits = 0;
 					}
 				}
 
-				if (pack(1, 1) == FAIL) return 0;
-				if (pack(maxOffset, offsetBits) == FAIL) return 0;
-				if (pack(maxLength, lengthBits) == FAIL) return 0;
+				if (call BitPacker.pack(1, 1) == FAIL) return 0;
+				if (call BitPacker.pack(maxOffset, offsetBits) == FAIL) return 0;
+				if (call BitPacker.pack(maxLength, lengthBits) == FAIL) return 0;
 
 				encStartIdx += maxLength + 1;
 			}
@@ -112,7 +112,7 @@ implementation {
 		return call BitPacker.getLength();
 	}
 
-	command uint8_t Compressor.chainDecode(uint8_t* prev, uint8_t* in, uint8_t* out, uint8_t prevLength, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.chainDecode(uint8_t* prev, uint8_t* in, uint8_t* out, uint8_t prevLength, uint8_t inLength, uint8_t outMaxLength) {
 		// TODO: implement decode
 		return 0;
 	}
