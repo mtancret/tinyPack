@@ -1,6 +1,6 @@
 ---
+layout: default
 title: tinyPack
-layout: wikistyle
 ---
 
 tinyPack
