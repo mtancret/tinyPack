@@ -1,8 +1,6 @@
 /**
- * LzssChainCompressC.nc
- * Purpose: Provides LZSS-like compression algorithms. Chain compression
- * can increase compression efficiency by using the previously compressed
- * text as a dictionary for compressing the current text.
+ * BitTwiddler.nc
+ * Purpose: Bit twiddling utility.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -20,17 +18,7 @@
  * limitations under the License.
  */
 
-configuration LzssChainCompressC {
-	provides {
-		interface ChainCompressor;
-	}
-}
-implementation {
-	components new LzssChainCompressP() as LzssChainCompressor;
-	components BitPackP;
-	components BitTwiddelP;
-
-	ChainCompressor = LzssChainCompress.ChainCompressor;
-	LzssChainCompressor.BitPacker -> BitPackP.BitPacker;
-	LzssChainCompressor.BitTwiddler -> BitTwiddelP.BitTwiddler;
+interface BitTwiddler {
+	/* count leading zeros of a single byte */
+	command uint8_t BitTwiddler.clz8(uint8_t bits);
 }

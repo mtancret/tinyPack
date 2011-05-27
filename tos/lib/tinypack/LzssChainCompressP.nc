@@ -20,18 +20,27 @@
  * limitations under the License.
  */
 
-#include "bittwiddel.h"
-
 module LzssChainCompressP {
 	provides {
+		interface Init;
 		interface ChainCompressor;
 	}
 	uses {
 		interface BitPacker;
+		interface BitTwiddler;
 	}
 }
 implementation {
-	command uint8_t ChainCompressor.chainEncode(uint8_t* prev, uint8_t* in, uint8_t* out, uint8_t prevLength, uint8_t inLength, uint8_t outMaxLength) {
+	uint8_t* prev = NULL;
+	uint8_t prevLength = 0;
+
+	command error_t Init.init() {
+		prev = NULL;
+		prevLength = 0;	
+		return SUCCESS;
+	}
+
+	command uint8_t ChainCompressor.encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		uint16_t encStartIdx;
 		uint16_t encMatchIdx;
 		uint16_t dicStartIdx;
@@ -41,14 +50,8 @@ implementation {
 		uint8_t offsetBits;
 		uint8_t lengthBits;
 
-		if (prevLength > 1) {
-			uint8_t bits = 8 - clz8(prevLength - 1);
-			offsetBits = bits;
-			lengthBits = bits;
-		} else {
-			offsetBits = 0;
-			lengthBits = 0;
-		}
+		offsetBits = 8 - call BitTwiddler.clz8(inLength - 1);
+		lengthBits = offsetBits;
 
 		call BitPacker.init(out, outMaxLength);
 
@@ -59,9 +62,10 @@ implementation {
 
 			maxOffset = 0;
 			maxLength = 0;
+			dicStartIdx = encStartIdx<inLength ? 0 : encStartIdx-inLength;
 			/* incrementally search the dictionary until it is no loger possible to find
 			   a larger match than maxLength */
-			for (dicStartIdx = encStartIdx-prevLength; encStartIdx-dicStartIdx > maxLength; dicStartIdx++) {
+			for (; encStartIdx-dicStartIdx > maxLength; dicStartIdx++) {
 				uint8_t matchLength;
 
 				encMatchIdx = encStartIdx;
@@ -94,7 +98,7 @@ implementation {
 
 				if (remaining < inLength/2) {
 					if (remaining > 1) {
-						uint8_t bits = 8 - clz8(remaining - 1);
+						uint8_t bits = 8 - call BitTwiddler.clz8(remaining - 1);
 						lengthBits = bits;
 					} else {
 						lengthBits = 0;
@@ -109,11 +113,24 @@ implementation {
 			}
 		}
 
+		if (prev != NULL) {
+			signal ChainCompressor.free(prev);
+		}
+		prev = in;
+		prevLength = inLength;
+
 		return call BitPacker.getLength();
 	}
 
-	command uint8_t ChainCompressor.chainDecode(uint8_t* prev, uint8_t* in, uint8_t* out, uint8_t prevLength, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		// TODO: implement decode
+
+		if (prev != NULL) {
+			signal ChainCompressor.free(prev);
+		}
+		prev = out;
+		prevLength = outMaxLength;
+
 		return 0;
 	}
 }
