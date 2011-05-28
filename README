@@ -3,11 +3,18 @@ README for tinyPack
 ================================================================================
 Description
 
-Data compression algorithms for TinyOS. These algorithms can compress arrays of
-up to 256 bytes. They use no global memory other than the input and output
-arrays, making them suitable for typical TinyOS applications.
+This is a library of data compression algorithms for TinyOS. These algorithms
+can compress arrays of up to 256 bytes at a time. The main design criteria is
+that they use no more than a few hundred bytes of RAM. This is required because
+many microprocessors used for sensor networks have only a few kilobytes of RAM
+total. The most popular compression algorithms used today, typically require
+several kilobytes of RAM to achieve useful compression, making them unsuitable.
 
-Works in TinyOS 2.x.
+The code is still in the experimental stages. So far we have implementations
+of two LZSS-like compression algorithms and an even more experimental
+Exponential Golomb Code based compression algorithm.
+
+Targeting TinyOS 2.x.
 
 ================================================================================
 License

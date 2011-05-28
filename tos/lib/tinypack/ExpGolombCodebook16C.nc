@@ -1,8 +1,7 @@
 /**
- * LzssChainCompressC.nc
- * Purpose: Implementation of LZSS-like compression algorithms. Chain
- * compression can increase compression efficiency by using the previously
- * compressed text as a dictionary for compressing the current text.
+ * ExpGolombCodebook16C.nc
+ * Purpose: An adaptive codebook based on a hash table and the exponential
+ * golomb code. Uses 512 bytes of RAM.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -20,15 +19,17 @@
  * limitations under the License.
  */
 
-generic configuration LzssChainCompressC() {
+generic configuration ExpGolombCodebook16C() {
 	provides {
+		interface Codebook16;
 		interface ChainCompressor;
 	}
 }
 implementation {
-	components new LzssChainCompressP() as LzssChainCompressor;
+	components new ExpGolombCodebook16P() as ExpGolombCodebook16P;
 	components BitPackP;
 
-	ChainCompressor = LzssChainCompressor.ChainCompressor;
-	LzssChainCompressor.BitPacker -> BitPackP.BitPacker;
+	Codebook16 = ExpGolombCodebook16P.Codebook16;
+	ChainCompressor = ExpGolombCodebook16P.ChainCompressor;
+	ExpGolombCodebook16P.BitPacker -> BitPackP.BitPacker;
 }

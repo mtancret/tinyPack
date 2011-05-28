@@ -1,6 +1,7 @@
 /**
- * BitTwiddler.nc
- * Purpose: Bit twiddling utility.
+ * ExpGolombCodebook8C.nc
+ * Purpose: An adaptive codebook based on a hash table and the exponential
+ * golomb code. Uses 15 bytes of RAM.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -18,7 +19,17 @@
  * limitations under the License.
  */
 
-interface BitTwiddler {
-	/* count leading zeros of a single byte */
-	command uint8_t BitTwiddler.clz8(uint8_t bits);
+generic configuration ExpGolombCodebook8C() {
+	provides {
+		interface Codebook8;
+		interface ChainCompressor;
+	}
+}
+implementation {
+	components new ExpGolombCodebook8P() as ExpGolombCodebook8P;
+	components BitPackP;
+
+	Codebook8 = ExpGolombCodebook8P.Codebook8;
+	ChainCompressor = ExpGolombCodebook8P.ChainCompressor;
+	ExpGolombCodebook8P.BitPacker -> BitPackP.BitPacker;
 }

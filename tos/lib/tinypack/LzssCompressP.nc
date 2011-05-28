@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+#include "bittwiddler.h"
+
 module LzssCompressP {
 	provides {
 		interface Compressor;
@@ -74,7 +76,7 @@ implementation {
 				uint8_t remaining = inLength - encStartIdx;
 
 				if (encStartIdx > 1) {
-					int bits = 8 - __builtin_clz(encStartIdx - 1);
+					int bits = 8 - clz8(encStartIdx - 1);
 					offsetBits = bits;
 					lengthBits = bits;
 				} else {
@@ -84,7 +86,7 @@ implementation {
 
 				if (remaining < inLength/2) {
 					if (remaining > 1) {
-						int bits = 8 - __builtin_clz(remaining - 1);
+						int bits = 8 - clz8(remaining - 1);
 						lengthBits = bits;
 					} else {
 						lengthBits = 0;

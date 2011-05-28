@@ -1,8 +1,6 @@
 /**
- * LzssChainCompressC.nc
- * Purpose: Implementation of LZSS-like compression algorithms. Chain
- * compression can increase compression efficiency by using the previously
- * compressed text as a dictionary for compressing the current text.
+ * Codebook8.nc
+ * Purpose: A codebook that translates a single byte at a time.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -20,15 +18,11 @@
  * limitations under the License.
  */
 
-generic configuration LzssChainCompressC() {
-	provides {
-		interface ChainCompressor;
-	}
-}
-implementation {
-	components new LzssChainCompressP() as LzssChainCompressor;
-	components BitPackP;
-
-	ChainCompressor = LzssChainCompressor.ChainCompressor;
-	LzssChainCompressor.BitPacker -> BitPackP.BitPacker;
+interface Codebook8 {
+	/**
+	 * clear - input clear text
+	 * code - output code
+	 * returns length of code in bits
+	 */
+	command uint8_t getCode(uint8_t clear, uint16_t* code);
 }

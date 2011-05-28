@@ -80,6 +80,41 @@ implementation {
 		return SUCCESS;
 	}
 
+	command error_t BitPacker.pack16(uint16_t inVector, uint8_t inVectorLength) {
+		error_t success = 0;
+
+		if (inVectorLength > 8) {
+			success |= call BitPacker.pack(inVector, 8);
+			success |= call BitPacker.pack(inVector>>8, inVectorLength-8);
+		} else {
+			success |= call BitPacker.pack(inVector, inVectorLength);
+		}
+
+		return success;
+	}
+
+	command error_t BitPacker.pack32(uint32_t inVector, uint8_t inVectorLength) {
+		error_t success = 0;
+
+		if (inVectorLength > 24) {
+			success |= call BitPacker.pack(inVector, 8);
+			success |= call BitPacker.pack(inVector>>8, 8);
+			success |= call BitPacker.pack(inVector>>16, 8);
+			success |= call BitPacker.pack(inVector>>24, inVectorLength-24);
+		} else if (inVectorLength > 16) {
+			success |= call BitPacker.pack(inVector, 8);
+			success |= call BitPacker.pack(inVector>>8, 8);
+			success |= call BitPacker.pack(inVector>>16, inVectorLength-16);
+		} else if (inVectorLength > 8) {
+			success |= call BitPacker.pack(inVector, 8);
+			success |= call BitPacker.pack(inVector>>8, inVectorLength-8);
+		} else {
+			success |= call BitPacker.pack(inVector, inVectorLength);
+		}
+
+		return success;
+	}
+
 	command uint8_t BitPacker.getLength() {
 		return nextBitIdx == 0 ? byteIdx : byteIdx + 1;
 	}

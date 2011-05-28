@@ -26,9 +26,9 @@ interface ChainCompressor {
 	   inLength - length of uncompressed text
 	   outMaxLength - maximum allowable compressed text length
 	   return - length of compressed text, or 0 if compression failed */
-	command uint8_t chainEncode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength);
+	command uint8_t encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength);
 
-	command uint8_t chainDecode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength);
+	command uint8_t decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength);
 
 	event void free(uint8_t* previous);
 }

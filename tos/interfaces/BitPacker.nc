@@ -30,5 +30,9 @@ interface BitPacker {
 	   returns - FAIL if the bitVector overflows */
 	command error_t pack(uint8_t inVector, uint8_t inVectorLength);
 
+	command error_t pack16(uint16_t inVector, uint8_t inVectorLength);
+
+	command error_t pack32(uint32_t inVector, uint8_t inVectorLength);
+
 	command uint8_t getLength();
 }

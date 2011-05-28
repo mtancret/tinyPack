@@ -20,14 +20,15 @@
  * limitations under the License.
  */
 
-module LzssChainCompressP {
+#include "bittwiddler.h"
+
+generic module LzssChainCompressP() {
 	provides {
 		interface Init;
 		interface ChainCompressor;
 	}
 	uses {
 		interface BitPacker;
-		interface BitTwiddler;
 	}
 }
 implementation {
@@ -50,7 +51,7 @@ implementation {
 		uint8_t offsetBits;
 		uint8_t lengthBits;
 
-		offsetBits = 8 - call BitTwiddler.clz8(inLength - 1);
+		offsetBits = 8 - clz8(inLength - 1);
 		lengthBits = offsetBits;
 
 		call BitPacker.init(out, outMaxLength);
@@ -98,7 +99,7 @@ implementation {
 
 				if (remaining < inLength/2) {
 					if (remaining > 1) {
-						uint8_t bits = 8 - call BitTwiddler.clz8(remaining - 1);
+						uint8_t bits = 8 - clz8(remaining - 1);
 						lengthBits = bits;
 					} else {
 						lengthBits = 0;
