@@ -26,13 +26,9 @@ interface BitPacker {
 
 	/* Appends inVector to the current bit vector.
 	   inVector - right aligned bit vector to append
-	   inVectorLength - length in bits of inVector, maximum 8
+	   inVectorLength - length in bits of inVector
 	   returns - FAIL if the bitVector overflows */
-	command error_t pack(uint8_t inVector, uint8_t inVectorLength);
-
-	command error_t pack16(uint16_t inVector, uint8_t inVectorLength);
-
-	command error_t pack32(uint32_t inVector, uint8_t inVectorLength);
+	command error_t pack(uint32_t inVector, uint8_t inVectorLength);
 
 	command uint8_t getLength();
 }

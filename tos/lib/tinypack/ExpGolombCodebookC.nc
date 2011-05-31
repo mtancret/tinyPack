@@ -1,7 +1,7 @@
 /**
- * ExpGolombCodebook8C.nc
+ * ExpGolombCodebookC.nc
  * Purpose: An adaptive codebook based on a hash table and the exponential
- * golomb code. Uses 15 bytes of RAM.
+ * golomb code.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -19,17 +19,17 @@
  * limitations under the License.
  */
 
-generic configuration ExpGolombCodebook8C() {
+generic configuration ExpGolombCodebookC() {
 	provides {
-		interface Codebook8;
+		interface Codebook;
 		interface ChainCompressor;
 	}
 }
 implementation {
-	components new ExpGolombCodebook8P() as ExpGolombCodebook8P;
+	components new ExpGolombCodebookP() as ExpGolombCodebookP;
 	components BitPackP;
 
-	Codebook8 = ExpGolombCodebook8P.Codebook8;
-	ChainCompressor = ExpGolombCodebook8P.ChainCompressor;
-	ExpGolombCodebook8P.BitPacker -> BitPackP.BitPacker;
+	Codebook8 = ExpGolombCodebook8P.Codebook;
+	ChainCompressor = ExpGolombCodebookP.ChainCompressor;
+	ExpGolombCodebookP.BitPacker -> BitPackP.BitPacker;
 }

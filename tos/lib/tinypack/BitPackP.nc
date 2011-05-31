@@ -27,92 +27,62 @@ implementation {
 	uint8_t* bitVector;
 	uint8_t bitVectorMaxLength;
 	uint8_t byteIdx;
-	uint8_t nextBitIdx;
+	int nextBitIdx;
 
 	command void BitPacker.init(uint8_t* vector, uint8_t maxLength) {
 		bitVector = vector;
 		bitVectorMaxLength = maxLength;	
 		byteIdx = 0;
-		nextBitIdx = 0;
+		nextBitIdx = 7;
 	}
 
 	/* Appends inVector to the current bit vector.
-	   inVector - right aligned bit vector to append
-	   inVectorLength - length in bits of inVector, maximum 8
-	   returns - FAIL if the bitVector overflows */
-	command error_t BitPacker.pack(uint8_t inVector, uint8_t inVectorLength) {
-		/* how much the current byte has left before it is full */
-		uint8_t byteCapacity = 8-nextBitIdx;
-
+	 * Bit vectors are filled into bytes from most-significant to
+	 * least-significant bit. Bit vectors that streach across a byte
+	 * boundery are are ordered big-endian.
+	 * Return False if overflow occured.
+	 * inVector - right aligned bit vector to append
+	 * inVectorLength - length in bits of inVector
+	 * returns - FAIL if the bitVector overflows */
+	command error_t BitPacker.pack(uint32_t inVector, uint8_t inVectorLength) {
 		/* check for overflow */
 		if (byteIdx >= bitVectorMaxLength) {
 			return FAIL;
 		}
 
-		/* if starting a new byte zero it out */
-		if (nextBitIdx == 0) {
-			bitVector[byteIdx] = 0;
-		}
+		while (inVectorLength > 0) {
+			/* how much the current byte has left before it is full */
+			uint8_t byteCapacity = nextBitIdx + 1;
+			uint8_t writeBits;
+			uint8_t mask;
+			uint8_t bits;
 
-		/* pack inVector into the current byte */
-		bitVector[byteIdx] += (inVector << nextBitIdx);
-
-		/* check if the byte is now full */
-		if (byteCapacity == inVectorLength) {
-			byteIdx++;
-			nextBitIdx = 0;
-		/* check if not all of inVector fits into the byte */
-		} else if (byteCapacity < inVectorLength) {
-			byteIdx++;
-
-			/* check for overflow */
-			if (byteIdx >= bitVectorMaxLength) {
-				return FAIL;
+			if (inVectorLength < byteCapacity) {
+				writeBits = inVectorLength;
+			} else {
+				writeBits = byteCapacity;
 			}
 
-			/* pack the remaining bits */
-			bitVector[byteIdx] = inVector >> byteCapacity;
-			nextBitIdx = inVectorLength - byteCapacity;
-		} else {
-			nextBitIdx += inVectorLength;
+			mask = 0xff >> (8 - writeBits);
+			bits = inVector >> (inVectorLength - writeBits);
+			bitVector[byteIdx] |= (bits & mask) << (byteCapacity - writeBits);
+
+			nextBitIdx -= writeBits;
+			numBits -= writeBits;
+
+			if (nextBitIdx == -1) {
+				byteIdx++;
+				nextBitIdx = 7;
+				bitVector[byteIdx] = 0;
+
+				/* check for overflow */
+				if (byteIdx >= bitVectorMaxLength) {
+					return FAIL;
+				}
+			}
 		}
 
 		return SUCCESS;
-	}
-
-	command error_t BitPacker.pack16(uint16_t inVector, uint8_t inVectorLength) {
-		error_t success = 0;
-
-		if (inVectorLength > 8) {
-			success |= call BitPacker.pack(inVector, 8);
-			success |= call BitPacker.pack(inVector>>8, inVectorLength-8);
-		} else {
-			success |= call BitPacker.pack(inVector, inVectorLength);
-		}
-
-		return success;
-	}
-
-	command error_t BitPacker.pack32(uint32_t inVector, uint8_t inVectorLength) {
-		error_t success = 0;
-
-		if (inVectorLength > 24) {
-			success |= call BitPacker.pack(inVector, 8);
-			success |= call BitPacker.pack(inVector>>8, 8);
-			success |= call BitPacker.pack(inVector>>16, 8);
-			success |= call BitPacker.pack(inVector>>24, inVectorLength-24);
-		} else if (inVectorLength > 16) {
-			success |= call BitPacker.pack(inVector, 8);
-			success |= call BitPacker.pack(inVector>>8, 8);
-			success |= call BitPacker.pack(inVector>>16, inVectorLength-16);
-		} else if (inVectorLength > 8) {
-			success |= call BitPacker.pack(inVector, 8);
-			success |= call BitPacker.pack(inVector>>8, inVectorLength-8);
-		} else {
-			success |= call BitPacker.pack(inVector, inVectorLength);
-		}
-
-		return success;
 	}
 
 	command uint8_t BitPacker.getLength() {

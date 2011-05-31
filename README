@@ -1,5 +1,4 @@
 README for tinyPack
- 
 ================================================================================
 Description
 
@@ -15,7 +14,6 @@ of two LZSS-like compression algorithms and an even more experimental
 Exponential Golomb Code based compression algorithm.
 
 Targeting TinyOS 2.x.
-
 ================================================================================
 License
 

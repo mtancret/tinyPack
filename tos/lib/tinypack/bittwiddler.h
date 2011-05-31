@@ -24,4 +24,19 @@ inline uint8_t clz8(uint8_t byte) {
 	return count;
 }
 
+/* count leading zeros of a 16-bit word */
+inline uint8_t clz(uint16_t word) {
+	uint8_t count = 0;
+
+	if (word < 256) {
+		count = 8;
+	} else {
+		word >>= 8;
+	}
+
+	count += clz8(word);
+
+	return count;
+}
+
 #endif

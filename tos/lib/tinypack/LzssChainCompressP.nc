@@ -36,9 +36,13 @@ implementation {
 	uint8_t prevLength = 0;
 
 	command error_t Init.init() {
+		call ChainCompressor.init();
+		return SUCCESS;
+	}
+
+	command void ChainCompressor.init() {
 		prev = NULL;
 		prevLength = 0;	
-		return SUCCESS;
 	}
 
 	command uint8_t ChainCompressor.encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {

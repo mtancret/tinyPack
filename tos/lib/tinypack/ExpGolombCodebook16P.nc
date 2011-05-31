@@ -45,7 +45,8 @@ implementation {
 				in16 = in[i];
 			}
 			length = call Codebook16.getCode(in16, &code);
-			if (call BitPacker.pack32(code, length) == FAIL) return 0;
+			//if (call BitPacker.pack32(code, length) == FAIL) return 0;
+			if (call BitPacker.pack32(code, 1) == FAIL) return 0;
 		}
 
 		return call BitPacker.getLength();
@@ -57,7 +58,30 @@ implementation {
 	}
 
 	/**
-	 * See ExpGolombCodebook8P, this is an extension for 16-bit inputs.
+	 * Example of codebook. The code depends on the index at which the
+	 * clear is found. If the clear is not found the code is [1,clear].
+	 *
+	 *   index => code
+	 *
+	 *   0 => 0 1 0      depth=0, offset=0
+	 *   1 => 0 1 1
+	 *
+	 *   2 => 00 1 00    depth=1, offset=2
+	 *   3 => 00 1 01
+	 *   4 => 00 1 10
+	 *   5 => 00 1 11
+	 *
+	 *   6 => 000 1 000  depth=2, offset=6
+	 * ...
+	 *  14 => 0000 1 0000  depth=3, offset=14
+	 * ...
+	 *  30 => 00000 1 00000  depth=4, offset=30
+	 * ...
+	 *  62 => 000000 1 000000  depth=5, offset=62
+	 * ...
+	 * 126 => 0000000 1 0000000  depth=6, offset=126
+	 * ...
+	 * 254 => 00000000 1 00000000  depth=7, offset=254
 	 */
 	command uint8_t Codebook16.getCode(uint16_t clear, uint32_t* code) {
 		uint8_t depth;

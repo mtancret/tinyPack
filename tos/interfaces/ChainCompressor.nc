@@ -21,6 +21,9 @@
  */
 
 interface ChainCompressor {
+	/* Initialize the chain */
+	command void init();
+
 	/* in - location of uncompressed text
 	   out - where compressed text will be written
 	   inLength - length of uncompressed text
