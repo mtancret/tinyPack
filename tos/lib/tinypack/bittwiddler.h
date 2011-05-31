@@ -8,7 +8,7 @@ inline uint8_t clz8(uint8_t byte) {
 	if (byte & 0xf0) {
 		byte >>= 4;
 	} else {
-		count += 4;
+		count = 4;
 	}
 
 	if (byte & 0x0c) {
@@ -28,10 +28,10 @@ inline uint8_t clz8(uint8_t byte) {
 inline uint8_t clz(uint16_t word) {
 	uint8_t count = 0;
 
-	if (word < 256) {
-		count = 8;
-	} else {
+	if (word & 0xff00) {
 		word >>= 8;
+	} else {
+		count = 8;
 	}
 
 	count += clz8(word);

@@ -1,6 +1,6 @@
 /**
- * Codebook8.nc
- * Purpose: A codebook that translates a single byte at a time.
+ * Codebook.nc
+ * Purpose: Interface for a codebook with byte input and variable output.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-interface Codebook8 {
+interface Codebook {
 	/**
 	 * clear - input clear text
 	 * code - output code
