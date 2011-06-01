@@ -1,6 +1,8 @@
 /**
- * LzssCompressP.nc
- * Purpose: Implementation of LZSS-like compression algorithms.
+ * LzssChainP.nc
+ * Purpose: Implementation of LZSS-like compression algorithms. Chain
+ * compression can increase compression efficiency by using the previously
+ * compressed text as a dictionary for compressing the current text.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -20,46 +22,72 @@
 
 #include "bittwiddler.h"
 
-module LzssCompressP {
+generic module LzssChainP() {
 	provides {
-		interface Compressor;
+		interface Init;
+		interface ChainCompressor;
 	}
 	uses {
 		interface BitPacker;
 	}
 }
 implementation {
-	command uint8_t Compressor.encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
-		uint8_t encStartIdx;
-		uint8_t encMatchIdx;
-		uint8_t dicStartIdx;
-		uint8_t dicMatchIdx;
+	uint8_t* prev = NULL;
+	uint8_t prevLength = 0;
+
+	command error_t Init.init() {
+		call ChainCompressor.init();
+		return SUCCESS;
+	}
+
+	command void ChainCompressor.init() {
+		prev = NULL;
+		prevLength = 0;	
+	}
+
+	command uint8_t ChainCompressor.encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+		uint16_t encStartIdx;
+		uint16_t encMatchIdx;
+		uint16_t dicStartIdx;
+		uint16_t dicMatchIdx;
 		uint8_t maxOffset;
 		uint8_t maxLength;
+		uint8_t offsetBits;
+		uint8_t lengthBits;
+
+		offsetBits = 8 - clz8(inLength - 1);
+		lengthBits = offsetBits;
 
 		call BitPacker.init(out, outMaxLength);
 
 		/* encode all of in[] */
-		encStartIdx = 0;
-		while(encStartIdx<inLength) {
+		encStartIdx = prevLength;
+		while (encStartIdx-prevLength < inLength) {
+
 
 			maxOffset = 0;
 			maxLength = 0;
+			dicStartIdx = encStartIdx<inLength ? 0 : encStartIdx-inLength;
 			/* incrementally search the dictionary until it is no loger possible to find
 			   a larger match than maxLength */
-			for (dicStartIdx = 0; encStartIdx-dicStartIdx > maxLength; dicStartIdx++) {
+			for (; encStartIdx-dicStartIdx > maxLength; dicStartIdx++) {
 				uint8_t matchLength;
 
 				encMatchIdx = encStartIdx;
 				dicMatchIdx = dicStartIdx;
-				while (encMatchIdx<inLength && dicMatchIdx<encStartIdx && in[encMatchIdx] == in[dicMatchIdx]) {
+
+				while (encMatchIdx-prevLength<inLength
+					&& dicMatchIdx<encStartIdx
+					&& in[encMatchIdx-prevLength] == (dicMatchIdx<prevLength ? prev[dicMatchIdx] : in[dicMatchIdx-prevLength])) {
+
 					encMatchIdx++;
 					dicMatchIdx++;
+
 				}
 
 				matchLength = dicMatchIdx - dicStartIdx;
 				if (matchLength > maxLength) {
-					maxOffset = dicStartIdx;
+					maxOffset = dicStartIdx - (encStartIdx - prevLength);
 					/* recorded length is one smaller than actual length */
 					maxLength = matchLength - 1;
 				}
@@ -67,26 +95,15 @@ implementation {
 
 			if (maxLength < 1) {
 				if (call BitPacker.pack(0, 1) == FAIL) return 0;
-				if (call BitPacker.pack(in[encStartIdx], 8) == FAIL) return 0;
+				if (call BitPacker.pack(in[encStartIdx-prevLength], 8) == FAIL) return 0;
 
 				encStartIdx++;
 			} else {
-				uint8_t offsetBits;
-				uint8_t lengthBits;
-				uint8_t remaining = inLength - encStartIdx;
-
-				if (encStartIdx > 1) {
-					int bits = 8 - clz8(encStartIdx - 1);
-					offsetBits = bits;
-					lengthBits = bits;
-				} else {
-					offsetBits = 0;
-					lengthBits = 0;
-				}
+				uint8_t remaining = inLength - (encStartIdx - prevLength);
 
 				if (remaining < inLength/2) {
 					if (remaining > 1) {
-						int bits = 8 - clz8(remaining - 1);
+						uint8_t bits = 8 - clz8(remaining - 1);
 						lengthBits = bits;
 					} else {
 						lengthBits = 0;
@@ -101,11 +118,24 @@ implementation {
 			}
 		}
 
+		if (prev != NULL) {
+			signal ChainCompressor.free(prev);
+		}
+		prev = in;
+		prevLength = inLength;
+
 		return call BitPacker.getLength();
 	}
 
-	command uint8_t Compressor.decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		// TODO: implement decode
+
+		if (prev != NULL) {
+			signal ChainCompressor.free(prev);
+		}
+		prev = out;
+		prevLength = outMaxLength;
+
 		return 0;
 	}
 }

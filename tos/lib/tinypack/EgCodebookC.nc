@@ -1,5 +1,5 @@
 /**
- * ExpGolombCodebookC.nc
+ * EgCodebookC.nc
  * Purpose: An adaptive codebook based on a hash table and the exponential
  * golomb code.
  * Author(s): Matthew Tan Creti
@@ -19,17 +19,17 @@
  * limitations under the License.
  */
 
-generic configuration ExpGolombCodebookC() {
+generic configuration EgCodebookC() {
 	provides {
 		interface Codebook;
 		interface ChainCompressor;
 	}
 }
 implementation {
-	components new ExpGolombCodebookP() as ExpGolombCodebookP;
+	components new EgCodebookP() as EgCodebookP;
 	components BitPackP;
 
-	Codebook = ExpGolombCodebookP.Codebook;
-	ChainCompressor = ExpGolombCodebookP.ChainCompressor;
-	ExpGolombCodebookP.BitPacker -> BitPackP.BitPacker;
+	Codebook = EgCodebookP.Codebook;
+	ChainCompressor = EgCodebookP.ChainCompressor;
+	EgCodebookP.BitPacker -> BitPackP.BitPacker;
 }

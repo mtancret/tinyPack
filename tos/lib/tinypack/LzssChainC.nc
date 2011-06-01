@@ -1,5 +1,5 @@
 /**
- * LzssChainCompressC.nc
+ * LzssChainC.nc
  * Purpose: Implementation of LZSS-like compression algorithms. Chain
  * compression can increase compression efficiency by using the previously
  * compressed text as a dictionary for compressing the current text.
@@ -20,15 +20,15 @@
  * limitations under the License.
  */
 
-generic configuration LzssChainCompressC() {
+generic configuration LzssChainC() {
 	provides {
 		interface ChainCompressor;
 	}
 }
 implementation {
-	components new LzssChainCompressP() as LzssChainCompressor;
+	components new LzssChainP() as LzssChain;
 	components BitPackP;
 
-	ChainCompressor = LzssChainCompressor.ChainCompressor;
-	LzssChainCompressor.BitPacker -> BitPackP.BitPacker;
+	ChainCompressor = LzssChain.ChainCompressor;
+	LzssChain.BitPacker -> BitPackP.BitPacker;
 }

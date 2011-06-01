@@ -1,7 +1,8 @@
 /**
- * ExpGolombCodebookP.nc
- * Purpose: An adaptive codebook using an exponential golomb code.
- * Requires 512 bytes of RAM.
+ * EgCodebookP.nc
+ * Purpose: Implements an adaptive codebook using an exponential golomb code.
+ * Uses 384 bytes of RAM. Also implements a simple compressor using the
+ * codebook.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -19,9 +20,12 @@
  * limitations under the License.
  */
 
+#ifndef EXP_GOLOMB_K
+/* default exponential golomb model */
 #define EXP_GOLOMB_K 2
+#endif
 
-generic module ExpGolombCodebookP() {
+generic module EgCodebookP() {
 	provides {
 		interface Codebook;
 		interface ChainCompressor;
@@ -32,10 +36,10 @@ generic module ExpGolombCodebookP() {
 }
 implementation {
 	uint8_t codebook[256];
-	uint8_t reverse[256];
+	uint8_t reverse[128];
 
 	command void ChainCompressor.init() {
-		uint8_t i;
+		uint16_t i;
 		for (i=0; i<256; i++) {
 			codebook[i] = i;
 			reverse[i] = i;	
@@ -79,6 +83,7 @@ implementation {
 	 *
 	 * ...
 	 *
+	 * 2^k number of codes can be optimized
 	 * 252 => 00000 00
 	 * ...
 	 * 255 => 00000 11
@@ -107,43 +112,12 @@ implementation {
 		swapReverse = reverse[swapCode];
 		codebook[clear] = swapCode;
 		codebook[swapReverse] = binCode;
-		reverse[binCode] = swapReverse;
+		/* do not ever need to know the reverse of codes >=128 */
+		if (binCode < 128) {
+			reverse[binCode] = swapReverse;
+		}
 		reverse[swapCode] = clear;
 
 		return length;
 	}
 }
-
-//		uint8_t depth;
-//		uint8_t prehash = clear ^ (clear >> 4);
-//		uint8_t lastIdx;
-//
-//		/* default if clear is not found in codebook */
-//		uint8_t length = 9;
-//		*code = clear + 0x0100;
-//
-//		/* search for clear in code book */
-//		for (depth=0; depth<3; depth++) {
-//			uint8_t offset = (1 << (2 + depth)) - 4;
-//			uint8_t hash = (prehash % (offset + 4)) + offset;	
-//			if (codebook[hash] == clear) {
-//				if (dpeth == 2) {
-//					/* terminal depth has prefix of just 000 */
-//					*code = hash - offset;
-//					length = 7;
-//				} else {
-//					*code = hash - offset + (4 << depth);
-//					length = 2*depth + 4;
-//				}
-//
-//				/* push clear to a higher level */
-//				codebook[hash] = codebook[lastIdx];
-//				codebook[lastIdx] = clear;
-//
-//				break;
-//			}
-//			codebook[hash] = propagate;	
-//			propagate = temp;
-//		}
-//
-//		return length;

@@ -1,5 +1,5 @@
 /**
- * LzssCompressC.nc
+ * LzssC.nc
  * Purpose: Provides LZSS-like compression algorithms.
  * Author(s): Matthew Tan Creti
  *
@@ -18,15 +18,15 @@
  * limitations under the License.
  */
 
-configuration LzssCompressC {
+configuration LzssC {
 	provides {
 		interface Compressor;
 	}
 }
 implementation {
-	components LzssCompressP;
+	components LzssP;
 	components BitPackP;
 
-	Compressor = LzssCompressP.Compressor;
-	LzssCompressP.BitPacker -> BitPackP.BitPacker;
+	Compressor = LzssP.Compressor;
+	LzssP.BitPacker -> BitPackP.BitPacker;
 }
