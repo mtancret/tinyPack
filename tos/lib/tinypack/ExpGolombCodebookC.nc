@@ -29,7 +29,7 @@ implementation {
 	components new ExpGolombCodebookP() as ExpGolombCodebookP;
 	components BitPackP;
 
-	Codebook8 = ExpGolombCodebook8P.Codebook;
+	Codebook = ExpGolombCodebookP.Codebook;
 	ChainCompressor = ExpGolombCodebookP.ChainCompressor;
 	ExpGolombCodebookP.BitPacker -> BitPackP.BitPacker;
 }

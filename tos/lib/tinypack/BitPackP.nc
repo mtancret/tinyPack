@@ -68,7 +68,7 @@ implementation {
 			bitVector[byteIdx] |= (bits & mask) << (byteCapacity - writeBits);
 
 			nextBitIdx -= writeBits;
-			numBits -= writeBits;
+			inVectorLength -= writeBits;
 
 			if (nextBitIdx == -1) {
 				byteIdx++;

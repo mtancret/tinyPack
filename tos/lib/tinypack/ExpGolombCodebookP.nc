@@ -48,8 +48,8 @@ implementation {
 		call BitPacker.init(out, outMaxLength);
 		for (i=0; i<inLength; i++) {
 			uint16_t code;
-			uint8_t length = call Codebook8.getCode(in[i], &code);
-			if (call BitPacker.pack16(code, length) == FAIL) return 0;
+			uint8_t length = call Codebook.getCode(in[i], &code);
+			if (call BitPacker.pack(code, length) == FAIL) return 0;
 		}
 
 		return call BitPacker.getLength();
