@@ -1,8 +1,9 @@
 /**
- * EgCodebookP.nc
- * Purpose: Implements an adaptive codebook using an exponential golomb code.
- * Uses 384 bytes of RAM. Also implements a simple compressor using the
- * codebook.
+ * EgaCodebookP.nc
+ * (Exponential Golomb Adaptive Codebook)
+ * Purpose: Implements an adaptive codebook using exponential
+ * golomb coding. Uses 384 bytes of RAM. Also implements a simple
+ * compressor using the codebook.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -25,7 +26,7 @@
 #define EXP_GOLOMB_K 2
 #endif
 
-generic module EgCodebookP() {
+generic module EgaCodebookP() {
 	provides {
 		interface Codebook;
 		interface ChainCompressor;

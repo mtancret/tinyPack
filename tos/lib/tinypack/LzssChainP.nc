@@ -29,6 +29,7 @@ generic module LzssChainP() {
 	}
 	uses {
 		interface BitPacker;
+		interface Codebook;
 	}
 }
 implementation {
@@ -94,8 +95,12 @@ implementation {
 			}
 
 			if (maxLength < 1) {
+				uint16_t code;
+				uint8_t codeLength;
+
+				codeLength = call Codebook.getCode(in[encStartIdx-prevLength], &code);
 				if (call BitPacker.pack(0, 1) == FAIL) return 0;
-				if (call BitPacker.pack(in[encStartIdx-prevLength], 8) == FAIL) return 0;
+				if (call BitPacker.pack(code, codeLength) == FAIL) return 0;
 
 				encStartIdx++;
 			} else {

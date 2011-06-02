@@ -1,7 +1,8 @@
 /**
- * EgCodebookC.nc
- * Purpose: An adaptive codebook based on a hash table and the exponential
- * golomb code.
+ * LzrwChainC.nc
+ * Purpose: Implementation of LZRW-like compression algorithms. Chain
+ * compression can increase compression efficiency by using the previously
+ * compressed text as a dictionary for compressing the current text.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -19,17 +20,17 @@
  * limitations under the License.
  */
 
-generic configuration EgCodebookC() {
+generic configuration LzrwChainC() {
 	provides {
-		interface Codebook;
 		interface ChainCompressor;
 	}
 }
 implementation {
-	components new EgCodebookP() as EgCodebookP;
+	components new LzrwChainP() as LzrwChain;
+	components new EgaCodebookC() as Codebook;
 	components BitPackP;
 
-	Codebook = EgCodebookP.Codebook;
-	ChainCompressor = EgCodebookP.ChainCompressor;
-	EgCodebookP.BitPacker -> BitPackP.BitPacker;
+	ChainCompressor = LzrwChain.ChainCompressor;
+	LzrwChain.Codebook -> Codebook.Codebook;
+	LzrwChain.BitPacker -> BitPackP.BitPacker;
 }

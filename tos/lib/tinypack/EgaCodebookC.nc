@@ -1,6 +1,7 @@
 /**
- * LzssC.nc
- * Purpose: Provides LZSS-like compression algorithms.
+ * EgaCodebookC.nc
+ * (Exponential Golomb Adaptive Codebook)
+ * Purpose: An adaptive codebook using exponential golomb coding.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -18,17 +19,17 @@
  * limitations under the License.
  */
 
-configuration LzssC {
+generic configuration EgaCodebookC() {
 	provides {
-		interface Compressor;
+		interface Codebook;
+		interface ChainCompressor;
 	}
 }
 implementation {
-	components LzssP;
+	components new EgaCodebookP() as EgaCodebookP;
 	components BitPackP;
-	components NoCodebookP as Codebook;
 
-	Compressor = LzssP.Compressor;
-	LzssP.BitPacker -> BitPackP.BitPacker;
-	LzssP.Codebook -> Codebook;
+	Codebook = EgaCodebookP.Codebook;
+	ChainCompressor = EgaCodebookP.ChainCompressor;
+	EgaCodebookP.BitPacker -> BitPackP.BitPacker;
 }

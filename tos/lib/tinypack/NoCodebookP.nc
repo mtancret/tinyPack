@@ -1,6 +1,6 @@
 /**
- * LzssC.nc
- * Purpose: Provides LZSS-like compression algorithms.
+ * NoCodebookM.nc
+ * Purpose: Used as a dummy codebook.
  * Author(s): Matthew Tan Creti
  *
  * Copyright 2011 Matthew Tan Creti
@@ -18,17 +18,14 @@
  * limitations under the License.
  */
 
-configuration LzssC {
+module NoCodebookP() {
 	provides {
-		interface Compressor;
+		interface Codebook;
 	}
 }
 implementation {
-	components LzssP;
-	components BitPackP;
-	components NoCodebookP as Codebook;
-
-	Compressor = LzssP.Compressor;
-	LzssP.BitPacker -> BitPackP.BitPacker;
-	LzssP.Codebook -> Codebook;
+	command uint8_t Codebook.getCode(uint8_t clear, uint16_t* code) {
+		*code = clear;
+		return 8;
+	}
 }
