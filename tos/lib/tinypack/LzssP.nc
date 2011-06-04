@@ -30,7 +30,7 @@ module LzssP {
 	}
 }
 implementation {
-	command uint8_t Compressor.encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t Compressor.compress(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		uint8_t encStartIdx;
 		uint8_t encMatchIdx;
 		uint8_t dicStartIdx;
@@ -109,7 +109,7 @@ implementation {
 		return call BitPacker.getLength();
 	}
 
-	command uint8_t Compressor.decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t Compressor.expand(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		// TODO: implement decode
 		return 0;
 	}

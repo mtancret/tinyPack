@@ -46,7 +46,7 @@ implementation {
 		prevLength = 0;	
 	}
 
-	command uint8_t ChainCompressor.encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.compress(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		uint16_t encStartIdx;
 		uint16_t encMatchIdx;
 		uint16_t dicStartIdx;
@@ -132,7 +132,7 @@ implementation {
 		return call BitPacker.getLength();
 	}
 
-	command uint8_t ChainCompressor.decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.expand(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		// TODO: implement decode
 
 		if (prev != NULL) {

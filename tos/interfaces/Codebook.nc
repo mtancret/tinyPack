@@ -24,5 +24,5 @@ interface Codebook {
 	 * code - output code
 	 * returns length of code in bits
 	 */
-	command uint8_t getCode(uint8_t clear, uint16_t* code);
+	command uint8_t encode(uint8_t clear, uint16_t* code);
 }
