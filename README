@@ -2,18 +2,42 @@ README for tinyPack
 ================================================================================
 Description
 
-This is a library of data compression algorithms for TinyOS. These algorithms
-can compress arrays of up to 256 bytes at a time. The main design criteria is
-that they use no more than a few hundred bytes of RAM. This is required because
-many microprocessors used for sensor networks have only a few kilobytes of RAM
-total. The most popular compression algorithms used today, typically require
+This is a library of data compression algorithms for TinyOS. The implemented
+algorithms can compress arrays of up to 256 bytes at a time. To make
+compression suitable to low-end embedded systems, the primary objective is to
+reduce the RAM usage. None of these implementations use more than a few hundred
+bytes of RAM. The second most important object is speed of compression and
+decompression. Popular compression algorithms such as LZW, typically require
 several kilobytes of RAM to achieve useful compression, making them unsuitable.
 
-The code is still in the experimental stages. So far we have implementations
-of two LZSS-like compression algorithms and an even more experimental
-Exponential Golomb Code based compression algorithm.
+The code is still in the experimental stages. Here is a brief introduction to
+the compression algorithms available in tos/lib/tinypack. PC based
+decompression is available in scripts/tinypack/tinypack.py.
 
-Targeting TinyOS 2.x.
+LzrwEgaChainC
+	512 Bytes RAM, Fast, Good compression ratio
+	This is an LZRW-like compression algorithm, which means that is uses a
+	hash table to find repeat sequences of bytes that can be compressed
+	down. LZRW encoding is similar to LZSS, but the hash table method makes
+	compression fast, at the cost of a 128 byte table in RAM. Bytes that are
+	not part of a repeated sequence, are encoding individually using an EGA
+	(Exponential Golomb Adaptive) codebook. This codebook is fast, achieves
+	good compression when bytes fit the exponential model, and uses 384
+	bytes of RAM.
+
+LzrwChainC
+	128 Bytes RAM, Fast, Moderate compression ratio
+	Same as LzrwEgaChainC, except no codebook is used to encode literal
+	bytes. This uses less RAM, but reduces the compression ratio.
+
+LzssChainC
+	No RAM, Slow, Moderate compression ratio
+	This is an LZSS-like compression algorithm. The advantage of LZSS is
+	that is can be implemented without using any RAM. This is because
+	the search for repeated sequences is performed iteratively over the
+	previously compressed data. The cost is that this search is slow.
+
+The TinyOS code is compatible with TinyOS 2.x.
 ================================================================================
 License
 
