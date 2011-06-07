@@ -1,5 +1,5 @@
 /**
- * LzrwChainC.nc
+ * LzrwEgaChainC.nc
  * Purpose: Implementation of LZRW-like compression algorithms. Chain
  * compression can increase compression efficiency by using the previously
  * compressed text as a dictionary for compressing the current text.
@@ -20,7 +20,7 @@
  * limitations under the License.
  */
 
-generic configuration LzrwChainC() {
+generic configuration LzrwEgaChainC() {
 	provides {
 		interface ChainCompressor;
 	}

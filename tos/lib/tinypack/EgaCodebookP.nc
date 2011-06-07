@@ -47,20 +47,20 @@ implementation {
 		}
 	}
 
-	command uint8_t ChainCompressor.encode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.compress(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		uint8_t i;
 
 		call BitPacker.init(out, outMaxLength);
 		for (i=0; i<inLength; i++) {
 			uint16_t code;
-			uint8_t length = call Codebook.getCode(in[i], &code);
+			uint8_t length = call Codebook.encode(in[i], &code);
 			if (call BitPacker.pack(code, length) == FAIL) return 0;
 		}
 
 		return call BitPacker.getLength();
 	}
 
-	command uint8_t ChainCompressor.decode(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
+	command uint8_t ChainCompressor.expand(uint8_t* in, uint8_t* out, uint8_t inLength, uint8_t outMaxLength) {
 		// TODO: implement decode
 		return 0;
 	}
@@ -89,7 +89,7 @@ implementation {
 	 * ...
 	 * 255 => 00000 11
 	 */
-	command uint8_t Codebook.getCode(uint8_t clear, uint16_t* code) {
+	command uint8_t Codebook.encode(uint8_t clear, uint16_t* code) {
 		/* the length of the returned code in bits */
 		uint8_t length;
 		/* the code in binary */

@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+DEBUG = True
+
 # Counts the leading zeros of a value stored in big-endian binary frame.
 # For example, clz(0x0f, 8) returns 4.
 # value - the value stored in the binary frame
@@ -76,8 +78,11 @@ class BitPacker(object):
 
 	# bitVector - list of bytes, default [0]
 	# maxLength - limit of how large bitVector can grow, default None
-	def __init__(self, bitVector=[0], maxLength=None):
-		self.bitVector = bitVector
+	def __init__(self, bitVector=None, maxLength=None):
+		if bitVector == None:
+			self.bitVector = [0]
+		else:
+			self.bitVector = bitVector
 		self.bitVectorMaxLength = maxLength
 		self.byteIdx = 0
 		self.nextBitIdx = 7
@@ -115,14 +120,14 @@ class BitPacker(object):
 		return True
 
 	def getBitVector(self):
-		if self.nextBitIdx == 0:
+		if self.nextBitIdx == 7:
 			return self.bitVector[:-1]
 		else:
 			return self.bitVector
 
 	# returns length of bit vector in bytes
 	def getLength(self):
-		if self.nextBitIdx == 0:
+		if self.nextBitIdx == 7:
 			return self.byteIdx
 		else:
 			return self.byteIdx+1
@@ -132,10 +137,13 @@ class NoCodebook(object):
 		""" """
 
 	def encodeNext(self, clear, bitPacker):
+		if DEBUG: print "Encoding literal: clear=",clear,"code=",clear,"bits= 8"
 		bitPacker.pack(clear, 8)
 
 	def decodeNext(self, bitUnpacker):
-		return bitUnpacker.getNext(8)
+		clear = bitUnpacker.getNext(8)
+		if DEBUG: print "Decoded literal: code=",clear,"clear=",clear
+		return clear
 
 class EgaCodebook(object):
 	def __init__(self, k=2):
@@ -162,6 +170,8 @@ class EgaCodebook(object):
 
 		self.updateCodebook(binCode)
 
+		if DEBUG: print "Encoding literal: clear=",clear,"code=",code,"bits=",length
+
 		bitPacker.pack(code, length)
 
 	def decodeNext(self, bitUnpacker):
@@ -181,6 +191,8 @@ class EgaCodebook(object):
 
 		clear = self.reverse[binCode]
 		self.updateCodebook(binCode)
+
+		if DEBUG: print "Decoded literal: clear=",clear
 
 		return clear
 
@@ -213,9 +225,12 @@ class EgaCodebook(object):
 		self.reverse[swapCode] = clear
 
 class Lzrw(object):
-	def __init__(self, blockSize, codebook=NoCodebook(), lzrwTableSize=128):
+	def __init__(self, blockSize, codebook=None, lzrwTableSize=128):
 		self.blockSize = blockSize
-		self.codebook = codebook
+		if codebook == None:
+			self.codebook = NoCodebook()
+		else:
+			self.codebook = codebook
 		self.lzrwTableSize = lzrwTableSize
 		self.init()
 
@@ -223,7 +238,6 @@ class Lzrw(object):
 		self.codebook.init()
 		self.lzss = Lzss(self.blockSize, self.codebook)
 
-		self.bitPacker = BitPacker()
 		self.prev = None
 		self.prevLength = 0
 		self.prevPrevLength = 0
@@ -236,6 +250,9 @@ class Lzrw(object):
 		return self.lzss.chainExpand(seq)
 
 	def chainCompress(self, seq):
+		if DEBUG: print "LZRW chain compressing:",seq
+
+		bitPacker = BitPacker()
 		dicStartidx = 0
 
 		offsetBits = 16 - clz(self.prevLength + len(seq) - 1, 16)
@@ -256,14 +273,16 @@ class Lzrw(object):
 				encMatchIdx = encStartIdx;
 				dicMatchIdx = dicStartIdx;
 
-				while (encMatchIdx - self.prevLength < len(seq) and dicMatchIdx < encStartIdx
-					and
-					(
+				while (encMatchIdx - self.prevLength < len(seq)
+					and dicMatchIdx < encStartIdx
+					and (
 						(
 							dicMatchIdx < self.prevLength
 							and
 							seq[encMatchIdx-self.prevLength] == self.prev[dicMatchIdx]
 						) or (
+							dicMatchIdx >= self.prevLength
+							and
 							seq[encMatchIdx-self.prevLength] == seq[dicMatchIdx - self.prevLength]
 						)
 					)):
@@ -276,8 +295,8 @@ class Lzrw(object):
 				length = dicMatchIdx - dicStartIdx
 
 			if length < 3:
-				self.bitPacker.pack(0, 1)
-				self.codebook.encodeNext(seq[encStartIdx-self.prevLength], self.bitPacker)
+				bitPacker.pack(0, 1)
+				self.codebook.encodeNext(seq[encStartIdx-self.prevLength], bitPacker)
 
 				encStartIdx+=1
 			else:
@@ -290,10 +309,12 @@ class Lzrw(object):
 					else:
 						lengthBits = 0
 
-				self.bitPacker.pack(1, 1)
-				self.bitPacker.pack(dicStartIdx, offsetBits)
+				if DEBUG: print "Encoding reference: offset=",dicStartIdx,"length=",length-1
+
+				bitPacker.pack(1, 1)
+				bitPacker.pack(dicStartIdx, offsetBits)
 				# recorded length is one smaller than actual length
-				self.bitPacker.pack(length - 1, lengthBits)
+				bitPacker.pack(length - 1, lengthBits)
 
 				encStartIdx += length
 
@@ -301,16 +322,22 @@ class Lzrw(object):
 		self.prevPrevLength = self.prevLength
 		self.prevLength = len(seq)
 
-		return self.bitPacker.getBitVector()
+		if DEBUG: print "Compressed bit vector:",bitPacker.getBitVector(),"\n"
+
+		return bitPacker.getBitVector()
 
 class Lzss(object):
-	def __init__(self, blockSize, codebook=NoCodebook):
+	def __init__(self, blockSize, codebook=None):
 		self.blockSize = blockSize
-		self.codebook = codebook
+		if codebook == None:
+			self.codebook = NoCodebook()
+		else:
+			self.codebook = codebook
 		self.init()
 
 	def init(self):
-		self.previous = None
+		self.prev = None
+		self.prevLength = 0
 
 	def expand(self, seq):
 		self.init()
@@ -350,37 +377,49 @@ class Lzss(object):
 		return decoded
 	
 	def chainExpand(self, seq):
+		if DEBUG: print "LZSS chain expanding:",seq
+
 		bitUnpacker = BitUnpacker(seq)
 		decByte = 0
 		decoded = []
 
-		offsetBits = 7
-		lengthBits = 7
+		offsetBits = 16 - clz(self.prevLength + self.blockSize - 1, 16)
+		lengthBits = offsetBits
+
 		while (decByte < self.blockSize):
-			remaining = self.blockSize - decByte;
-	
+			remaining = self.blockSize - decByte
+
 			if remaining < self.blockSize/2:
 				if remaining > 1:
-					bits = 8 - clz(remaining - 1, 8);
-					lengthBits = bits;
+					bits = 8 - clz(remaining - 1, 8)
+					lengthBits = bits
 				else:
-					lengthBits = 0;
+					lengthBits = 0
 
 			flag = bitUnpacker.getNext(1) 
 			if flag == 0:
 				byte = self.codebook.decodeNext(bitUnpacker)
 				decoded.append(byte)
+
 				decByte += 1
 			else:
 				offset = bitUnpacker.getNext(offsetBits)
 				length = bitUnpacker.getNext(lengthBits)
 
 				for i in range(length+1):
-					dicIdx = decByte - self.blockSize + offset + i
-					if (dicIdx < 0):
-						decoded.append(self.previous[dicIdx])
+					dicIdx = offset + i
+					if (dicIdx < self.prevLength):
+						decoded.append(self.prev[dicIdx])
 					else:
-						decoded.append(decoded[dicIdx])
-	
+						decoded.append(decoded[dicIdx - self.prevLength])
+
+				if DEBUG: print "Decoded reference: offset=",offset,"length=",length,decoded[-length-1:]
+
 				decByte += length + 1
+
+		self.prev = decoded
+		self.prevLength = self.blockSize
+
+		if DEBUG: print "LZSS expanded:",seq,"\n"
+
 		return decoded

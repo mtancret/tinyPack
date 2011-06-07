@@ -24,7 +24,6 @@
 
 generic module LzssChainP() {
 	provides {
-		interface Init;
 		interface ChainCompressor;
 	}
 	uses {
@@ -35,11 +34,6 @@ generic module LzssChainP() {
 implementation {
 	uint8_t* prev = NULL;
 	uint8_t prevLength = 0;
-
-	command error_t Init.init() {
-		call ChainCompressor.init();
-		return SUCCESS;
-	}
 
 	command void ChainCompressor.init() {
 		prev = NULL;
