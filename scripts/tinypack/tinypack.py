@@ -420,6 +420,6 @@ class Lzss(object):
 		self.prev = decoded
 		self.prevLength = self.blockSize
 
-		if DEBUG: print "LZSS expanded:",seq,"\n"
+		if DEBUG: print "LZSS expanded:",decoded,"\n"
 
 		return decoded
